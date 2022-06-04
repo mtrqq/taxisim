@@ -1,17 +1,19 @@
-from dataclasses import dataclass, field
-from queue import PriorityQueue
 import time
 import uuid
-from typing import TYPE_CHECKING, Callable, Dict
+from dataclasses import dataclass
+from dataclasses import field
+from queue import PriorityQueue
+from typing import TYPE_CHECKING
+from typing import Callable
 
-from ..service import EventServer
-from .ride import Ride
+from taxisim.service import EventServer
+from taxisim.taxi.ride import Ride
 
 if TYPE_CHECKING:
-    from .car import Car
-    from .finder import CarFinder
-    from ..point import Point
-    from ..human import Human
+    from taxisim.human import Human
+    from taxisim.point import Point
+    from taxisim.taxi.car import Car
+    from taxisim.taxi.finder import CarFinder
 
 
 @dataclass(order=True)
@@ -28,8 +30,8 @@ class TaxiService:
     def __init__(self, car_finder: "CarFinder", *, daemon: bool = True) -> None:
         self.car_finder = car_finder
 
-        self._rides: Dict[uuid.UUID, Ride] = {}
-        self._free_cars: Dict[uuid.UUID, "Car"] = {}
+        self._rides: dict[uuid.UUID, Ride] = {}
+        self._free_cars: dict[uuid.UUID, "Car"] = {}
         self._events: EventServer[RideEvent] = EventServer(
             self._handle_ride, daemon=daemon, queue=PriorityQueue()
         )

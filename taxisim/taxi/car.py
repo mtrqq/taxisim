@@ -1,6 +1,6 @@
 import enum
-from typing import TYPE_CHECKING, Optional
 import uuid
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..point import Point
@@ -16,7 +16,7 @@ class Car:
         self,
         speed: float,
         pos: Point,
-        id: Optional[uuid.UUID] = None,
+        id: uuid.UUID | None = None,
     ) -> None:
         self.id = id or uuid.uuid4()
         self.speed = speed

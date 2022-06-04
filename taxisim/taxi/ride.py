@@ -1,13 +1,15 @@
 import enum
-from typing import TYPE_CHECKING, Callable, Optional
 import uuid
+from typing import TYPE_CHECKING
+from typing import Callable
+from typing import Optional
+
 import transitions
 
-
 if TYPE_CHECKING:
-    from ..human import Human
-    from ..point import Point
-    from .car import Car
+    from taxisim.human import Human
+    from taxisim.point import Point
+    from taxisim.taxi.car import Car
 
 
 class State(enum.Enum):
@@ -38,11 +40,11 @@ class Ride:
         dest: "Point",
         *,
         passenger: "Human",
-        id: Optional[uuid.UUID] = None,
-        on_car_assigned: Optional[Callable[["Car"], None]] = None,
-        on_car_arrived: Optional[Callable[[], None]] = None,
-        on_ride_finished: Optional[Callable[[], None]] = None,
-        on_ride_cancelled: Optional[Callable[[], None]] = None,
+        id: uuid.UUID | None = None,
+        on_car_assigned: Callable[["Car"], None] | None = None,
+        on_car_arrived: Callable[[], None] | None = None,
+        on_ride_finished: Callable[[], None] | None = None,
+        on_ride_cancelled: Callable[[], None] | None = None,
     ) -> None:
         self.id: uuid.UUID = id or uuid.uuid4()
         self.source = source

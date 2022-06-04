@@ -26,7 +26,7 @@ class Ride:
         *,
         passenger: Human,
         id: Optional[uuid.UUID] = ...,
-        on_car_assigned: Optional[Callable[["Car"], None]] = ...,
+        on_car_assigned: Optional[Callable[[Car], None]] = ...,
         on_car_arrived: Optional[Callable[[], None]] = ...,
         on_ride_finished: Optional[Callable[[], None]] = ...,
         on_ride_cancelled: Optional[Callable[[], None]] = ...,

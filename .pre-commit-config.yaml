@@ -40,4 +40,12 @@ repos:
     rev: v0.960
     hooks:
       - id: mypy
-        additional_dependencies: [types-all]
+        files: ^taxisim/
+        entry: mypy --install-types --non-interactive taxisim/
+        pass_filenames: false
+        # args: [--ignore-missing-imports]
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8

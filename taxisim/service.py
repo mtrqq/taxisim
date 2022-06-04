@@ -2,11 +2,10 @@ import queue
 from queue import SimpleQueue
 from threading import Event
 from threading import Thread
-from typing import Callable, Optional
+from typing import Callable
 from typing import Generic
-from typing import List
-from typing import TypeVar
 from typing import Protocol
+from typing import TypeVar
 
 EventType = TypeVar("EventType")
 MessageType = TypeVar("MessageType")
@@ -27,13 +26,13 @@ class EventServer(Generic[EventType]):
         threads: int = 1,
         interval: float = 1.0,
         daemon: bool = False,
-        queue: Optional[QProto[EventType]] = None,
+        queue: QProto[EventType] | None = None,
     ) -> None:
         self.handle = handle
         self._interval = interval
         self._stop = Event()
         self._events: QProto[EventType] = queue if queue is not None else SimpleQueue()
-        self._threads: List[Thread] = [
+        self._threads: list[Thread] = [
             Thread(target=self.serve, daemon=daemon) for _ in range(threads)
         ]
 
