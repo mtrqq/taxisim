@@ -1,14 +1,14 @@
 import enum
 from typing import Callable, Optional
 import uuid
+from taxisim.callback import Callback
 from taxisim.human import Human
 from taxisim.point import Point
 from taxisim.taxi.car import Car
 import transitions
 
 # mark State as existing class
-class State(enum.Enum):
-    pass
+class State(enum.Enum): ...
 
 class Ride:
     state: State
@@ -16,7 +16,11 @@ class Ride:
     source: Point
     dest: Point
     passenger: Human
-    car: Car
+    car: Optional[Car]
+    on_car_assigned: Callback[[Optional[Car]]]
+    on_car_arrived: Callback[[]]
+    on_ride_finished: Callback[[]]
+    on_ride_cancelled: Callback[[]]
     smachine: transitions.Machine
 
     def __init__(

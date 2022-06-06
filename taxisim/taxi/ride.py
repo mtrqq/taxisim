@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Optional
 
+from taxisim.callback import Callback
+
 import transitions
 
 if TYPE_CHECKING:
@@ -12,7 +14,7 @@ if TYPE_CHECKING:
     from taxisim.taxi.car import Car
 
 
-class State(enum.Enum):
+class State(enum.IntEnum):
     Pending = enum.auto()
     CarAssigned = enum.auto()
     InProgress = enum.auto()
@@ -51,6 +53,11 @@ class Ride:
         self.dest = dest
         self.passenger = passenger
         self.car: Optional["Car"] = None
+
+        self.on_car_assigned = Callback.from_optional(on_car_assigned)
+        self.on_car_arrived = Callback.from_optional(on_car_arrived)
+        self.on_ride_finished = Callback.from_optional(on_ride_finished)
+        self.on_ride_cancelled = Callback.from_optional(on_ride_cancelled)
         self.smachine = transitions.Machine(
             self,
             states=State,
@@ -60,25 +67,25 @@ class Ride:
                     "trigger": "assign_car",
                     "source": State.Pending,
                     "dest": State.CarAssigned,
-                    "after": on_car_assigned or None,
+                    "after": self.on_car_assigned,
                 },
                 {
                     "trigger": "pick_up",
                     "source": State.CarAssigned,
                     "dest": State.InProgress,
-                    "before": on_car_arrived or None,
+                    "before": self.on_car_arrived,
                 },
                 {
                     "trigger": "finish",
                     "source": State.InProgress,
                     "dest": State.Finished,
-                    "after": on_ride_finished or None,
+                    "after": self.on_ride_finished,
                 },
                 {
                     "trigger": "cancel",
                     "source": [State.Pending, State.CarAssigned],
                     "dest": State.Cancelled,
-                    "after": on_ride_cancelled or None,
+                    "after": self.on_ride_cancelled,
                 },
             ],
         )
