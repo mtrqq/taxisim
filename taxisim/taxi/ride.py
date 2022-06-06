@@ -4,9 +4,9 @@ from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Optional
 
-from taxisim.callback import Callback
-
 import transitions
+
+from taxisim.callback import Callback
 
 if TYPE_CHECKING:
     from taxisim.human import Human

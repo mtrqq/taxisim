@@ -11,6 +11,10 @@ EventType = TypeVar("EventType")
 MessageType = TypeVar("MessageType")
 
 
+class ServiceShutdownError(RuntimeError):
+    pass
+
+
 class QProto(Protocol[MessageType]):
     def get(self, block: bool = True, timeout: float = None) -> MessageType:
         ...
@@ -66,4 +70,7 @@ class EventServer(Generic[EventType]):
                 pass
 
     def emit(self, event: EventType) -> None:
+        if self._stop.is_set():
+            raise ServiceShutdownError("Event service is shutting down")
+
         self._events.put(event, block=True)

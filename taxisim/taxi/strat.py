@@ -4,9 +4,9 @@ from typing import Container
 from typing import Optional
 
 if TYPE_CHECKING:
+    from taxisim.point import Point
     from taxisim.taxi.car import Car
     from taxisim.taxi.ride import Ride
-    from taxisim.point import Point
 
 
 CarFinder = Callable[["Ride", Container["Car"]], Optional["Car"]]

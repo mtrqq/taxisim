@@ -1,6 +1,9 @@
 import enum
 import uuid
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING
+from typing import Callable
+from typing import Optional
+
 import transitions
 
 from taxisim.callback import Callback
@@ -60,10 +63,14 @@ class Car:
                 },
             ],
         )
-    
+
     def set_environment(self, ride: Optional["Ride"] = None) -> None:
         self.ride = ride
 
     @property
     def is_in_ride(self) -> bool:
         return self.state == State.Ride
+
+    @property
+    def is_free(self) -> bool:
+        return self.state == State.WaitRide

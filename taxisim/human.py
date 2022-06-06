@@ -1,13 +1,14 @@
 import enum
-from typing import Callable, TYPE_CHECKING, Optional, TypeVar
 import uuid
+from typing import TYPE_CHECKING
+from typing import Callable
+from typing import TypeVar
 
 import transitions
 
 from taxisim.callback import Callback
 
 if TYPE_CHECKING:
-    from taxisim.taxi.car import Car
     from taxisim.point import Point
     from taxisim.taxi.ride import Ride
 
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-def _ensureattr(attr: Optional[T], name: str) -> T:
+def _ensureattr(attr: T | None, name: str) -> T:
     if attr is None:
         raise RuntimeError(f"Unable to fetch {name} value")
 
@@ -64,6 +65,7 @@ class Human:
         id: uuid.UUID | None = None,
         on_rest_started: Callable[[], None] | None = None,
         on_wanna_party: Callable[[], None] | None = None,
+        on_friend_found: Callable[[], None] | None = None,
         on_wait_guest: Callable[[], None] | None = None,
         on_wait_car: Callable[[], None] | None = None,
         on_ride_started: Callable[[], None] | None = None,
@@ -81,6 +83,7 @@ class Human:
 
         self.on_rest_started = Callback.from_optional(on_rest_started)
         self.on_wanna_party = Callback.from_optional(on_wanna_party)
+        self.on_friend_found = Callback.from_optional(on_friend_found)
         self.on_wait_guest = Callback.from_optional(on_wait_guest)
         self.on_wait_car = Callback.from_optional(on_wait_car)
         self.on_ride_started = Callback.from_optional(on_ride_started)
@@ -106,6 +109,10 @@ class Human:
     @property
     def is_at_home(self) -> bool:
         return self.pos == self.home
+
+    @property
+    def is_searching_friend(self) -> bool:
+        return self.state == State.WannaParty
 
     def _invited_by(self, friend: "Human") -> None:
         self._is_host = False
@@ -139,7 +146,11 @@ class Human:
                 transitions.State(
                     State.Rest, on_enter=[self.on_rest_started, self._back_home]
                 ),
-                transitions.State(State.WannaParty, on_enter=self.on_wanna_party),
+                transitions.State(
+                    State.WannaParty,
+                    on_enter=self.on_wanna_party,
+                    on_exit=self.on_friend_found,
+                ),
                 transitions.State(State.WaitGuest, on_enter=self.on_wait_guest),
                 transitions.State(State.AwaitingRide, on_enter=self.on_wait_car),
                 transitions.State(State.Ride, on_enter=self.on_ride_started),

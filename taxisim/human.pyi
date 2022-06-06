@@ -25,6 +25,7 @@ class Human:
 
     on_rest_started: Callback[[]]
     on_wanna_party: Callback[[]]
+    on_friend_found: Callback[[]]
     on_wait_guest: Callback[[]]
     on_wait_car: Callback[[]]
     on_ride_started: Callback[[]]
@@ -46,6 +47,8 @@ class Human:
         on_ride_started: Callable[[], None] | None = ...,
         on_party_started: Callable[[], None] | None = ...,
     ) -> None: ...
+    @property
+    def is_searching_friend(self) -> bool: ...
     @property
     def is_host(self) -> bool: ...
     @property

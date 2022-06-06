@@ -3,10 +3,11 @@ import uuid
 from dataclasses import dataclass
 from dataclasses import field
 from queue import PriorityQueue
-from typing import TYPE_CHECKING, Iterable, List, Protocol
+from typing import TYPE_CHECKING
+from typing import Any
 from typing import Callable
-
-from pyparsing import Optional
+from typing import Iterable
+from typing import Protocol
 
 from taxisim.service import EventServer
 from taxisim.taxi.ride import Ride
@@ -56,7 +57,7 @@ class TaxiServiceAPI(Protocol):
         ...
 
 
-# TODO: thread safety for car state
+# TODO: thread safety
 class TaxiService:
     def __init__(
         self,
@@ -83,20 +84,22 @@ class TaxiService:
 
         return False
 
-    def register_car(self, car: "Car") -> None:
-        if car.id in self._free_cars:
-            raise RuntimeError("Car already registered")
-
+    def _activate_car(self, car: "Car") -> None:
         self._free_cars[car.id] = car
+
+    def _deactivate_car(self, car: "Car") -> None:
+        del self._free_cars[car.id]
+
+    def register_car(self, car: "Car") -> None:
+        car.on_ride_accepted.subscribe(lambda *_: self._deactivate_car(car))
+        car.on_ride_finished.subscribe(lambda: self._activate_car(car))
+
+        if car.is_free:
+            self._activate_car(car)
 
     def register_cars(self, cars: Iterable["Car"]) -> None:
         for car in cars:
             self.register_car(car)
-
-    # def _add_ride_car(self, ride_id: uuid.UUID) -> None:
-    #     ride = self.get_ride_info(ride_id)
-    #     if ride.car is not None:
-    #         self.register_car(ride.car)
 
     def get_ride_info(self, id: uuid.UUID) -> Ride:
         try:
@@ -130,3 +133,16 @@ class TaxiService:
     def cancel_ride(self, id: uuid.UUID) -> None:
         ride = self.get_ride_info(id)
         ride.cancel()
+
+    def start(self) -> None:
+        self._events.start()
+
+    def shutdown(self, nowait: bool = False) -> None:
+        self._events.shutdown(nowait=nowait)
+
+    def __enter__(self) -> "TaxiService":
+        self.start()
+        return self
+
+    def __exit__(self, *_: Any) -> None:
+        self.shutdown()
