@@ -57,7 +57,6 @@ class TaxiServiceAPI(Protocol):
         ...
 
 
-# TODO: thread safety
 class TaxiService:
     def __init__(
         self,
