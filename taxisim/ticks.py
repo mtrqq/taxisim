@@ -1,11 +1,13 @@
-_COUNTER: int = 0
+from collections import defaultdict
+from typing import Hashable
+
+_TICKS: dict[Hashable, int] = defaultdict(int)
 
 
-def get() -> int:
-    return _COUNTER
+def get(tid: Hashable | None = None, /) -> int:
+    return _TICKS[tid]
 
 
-def increment() -> int:
-    global _COUNTER
-    _COUNTER += 1
-    return _COUNTER
+def increment(tid: Hashable | None = None) -> int:
+    _TICKS[tid] += 1
+    return _TICKS[tid]
