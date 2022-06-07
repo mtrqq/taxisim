@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 
 
 CarFinder = Callable[["Ride", Collection["Car"]], "Car" | None]
-CarWaitingStrat = Callable[[int, float], bool]
 PriceCalculator = Callable[["Point", "Point"], float]
 
 
@@ -41,10 +40,3 @@ def closest_free_car() -> CarFinder:
         return None
 
     return finder
-
-
-def wait_n_ticks(n: int) -> CarWaitingStrat:
-    def should_wait(tick: int, _: float) -> bool:
-        return tick <= n
-
-    return should_wait

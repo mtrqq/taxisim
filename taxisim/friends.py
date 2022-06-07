@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from queue import SimpleQueue
 from typing import Any
 from typing import Callable
-from typing import Protocol
 
 from taxisim.human import Human
 from taxisim.service import EventServer
@@ -19,11 +18,6 @@ class Role(enum.Enum):
 class FriendRequest:
     human: Human
     on_found: Callable[[Human, Role], None]
-
-
-class FriendsServiceAPI(Protocol):
-    def find_friend(self, me: Human, on_found: Callable[[Human], None]) -> None:
-        ...
 
 
 class FriendsService:

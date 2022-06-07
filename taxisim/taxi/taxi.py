@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
 from typing import Iterable
-from typing import Protocol
 
 from taxisim.service import EventServer
 from taxisim.taxi.ride import Ride
@@ -28,33 +27,6 @@ class RideEvent:
     @classmethod
     def timebased(cls, ride: Ride):
         return cls(-time.time(), ride)
-
-
-class TaxiServiceAPI(Protocol):
-    def register_car(self, car: "Car") -> None:
-        ...
-
-    def register_cars(self, cars: Iterable["Car"]) -> None:
-        ...
-
-    def get_ride_info(self, id: uuid.UUID) -> Ride:
-        ...
-
-    def get_price(self, source: "Point", dest: "Point") -> float:
-        ...
-
-    def request_ride(
-        self,
-        source: "Point",
-        dest: "Point",
-        passenger: "Human",
-        on_car_assigned: Callable[["Car"], None],
-        on_car_arrived: Callable[[], None],
-    ) -> Ride:
-        ...
-
-    def cancel_ride(self, id: uuid.UUID) -> None:
-        ...
 
 
 class TaxiService:
@@ -111,8 +83,8 @@ class TaxiService:
         source: "Point",
         dest: "Point",
         passenger: "Human",
-        on_car_assigned: Callable[["Car"], None],
-        on_car_arrived: Callable[[], None],
+        on_car_assigned: Callable[["Car"], None] | None = None,
+        on_car_arrived: Callable[[], None] | None = None,
     ) -> Ride:
         ride_id = uuid.uuid4()
         ride = Ride(

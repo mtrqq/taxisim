@@ -4,7 +4,7 @@ from taxisim.human import Human
 from taxisim.point import Point
 from taxisim.taxi.car import Car
 from taxisim.taxi.ride import Ride
-from taxisim.taxi.taxi import TaxiServiceAPI
+from taxisim.taxi.taxi import TaxiService
 
 
 def _add_average(avg1: float, size1: int, avg2: float, size2: int = 1) -> float:
@@ -89,7 +89,7 @@ class TaxiMetrics:
         return self.records[-1]
 
 
-def inject_metrics(service: TaxiServiceAPI) -> TaxiMetrics:
+def inject_metrics(service: TaxiService) -> TaxiMetrics:
     metrics = TaxiMetrics()
 
     def add_ride(ride: Ride) -> None:

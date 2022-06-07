@@ -1,4 +1,3 @@
-__all__ = ["TaxiServiceAPI", "TaxiService"]
+__all__ = ["TaxiService"]
 
 from .taxi import TaxiService
-from .taxi import TaxiServiceAPI
