@@ -21,7 +21,6 @@ class Ride:
     on_car_arrived: Callback[[]]
     on_ride_finished: Callback[[]]
     on_ride_cancelled: Callback[[]]
-    smachine: transitions.Machine
 
     def __init__(
         self,

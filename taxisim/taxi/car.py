@@ -44,7 +44,7 @@ class Car:
 
         self.on_ride_accepted = Callback.from_optional(on_ride_accepted)
         self.on_ride_finished = Callback.from_optional(on_ride_finished)
-        self.smachine = transitions.Machine(
+        self._smachine = transitions.Machine(
             self,
             states=State,
             initial=State.WaitRide,

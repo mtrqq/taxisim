@@ -1,6 +1,8 @@
 import math
 import random
 from dataclasses import dataclass
+from typing import Any
+from typing import ClassVar
 from typing import Container
 from typing import Iterator
 
@@ -19,6 +21,8 @@ def _order(x: Number, y: Number) -> tuple[Number, Number]:
 
 @dataclass
 class Point:
+    PRECISION: ClassVar[float] = 0.001
+
     array: NDArray
 
     @classmethod
@@ -62,3 +66,9 @@ class Point:
 
     def __iter__(self) -> Iterator[Number]:
         return iter(self.array)
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Point):
+            return NotImplemented
+
+        return np.isclose(self.array, other.array, atol=self.PRECISION).all()

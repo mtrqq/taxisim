@@ -15,7 +15,6 @@ class Car:
     pos: Point
     on_ride_accepted: Callback[[Ride]]
     on_ride_finished: Callback[[]]
-    smachine: transitions.Machine
 
     def __init__(
         self,

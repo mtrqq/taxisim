@@ -64,7 +64,7 @@ class Ride:
         self.on_car_arrived = Callback.from_optional(on_car_arrived)
         self.on_ride_finished = Callback.from_optional(on_ride_finished)
         self.on_ride_cancelled = Callback.from_optional(on_ride_cancelled)
-        self.smachine = transitions.Machine(
+        self._smachine = transitions.Machine(
             self,
             states=State,
             initial=State.Pending,
@@ -124,6 +124,9 @@ class Ride:
 
     @property
     def wait_time(self) -> int:
+        if not self.is_done:
+            return ticks.get() - self.started_at
+
         if self.is_cancelled:
             return self.done_at - self.created_at
         else:

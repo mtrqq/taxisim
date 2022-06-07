@@ -61,7 +61,7 @@ class TaxiService:
     def __init__(
         self,
         car_finder: "CarFinder",
-        price_calculator: PriceCalculator,
+        price_calculator: "PriceCalculator",
         *,
         daemon: bool = True,
     ) -> None:
