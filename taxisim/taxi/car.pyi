@@ -1,19 +1,24 @@
+import enum
 from typing import Callable, Optional
 import uuid
-import transitions
 from taxisim.callback import Callback
 
 from taxisim.point import Point
 from taxisim.taxi.ride import Ride
 
-class State: ...
+class State:
+    WaitRide: enum.IntEnum
+    PickupPassenger: enum.IntEnum
+    RideToDest: enum.IntEnum
 
 class Car:
     state: State
     id: uuid.UUID
     speed: float
     pos: Point
+    ride: Optional[Ride]
     on_ride_accepted: Callback[[Ride]]
+    on_passenger_picked_up: Callback[[]]
     on_ride_finished: Callback[[]]
 
     def __init__(
@@ -26,6 +31,7 @@ class Car:
         on_ride_finished: Callable[[], None] | None = ...,
     ) -> None: ...
     def accept_ride(self, ride: Optional[Ride] = ...) -> None: ...
+    def picked_up(self) -> None: ...
     def finish_ride(self) -> None: ...
     @property
     def is_in_ride(self) -> bool: ...

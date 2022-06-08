@@ -16,9 +16,9 @@ class MutableBehaviourAgent(mesa.Agent):
     def change_behaviour(self, behaviour: Callable[[], None]) -> None:
         self.behaviour = behaviour
 
-    def mkchanger(self, behaviour: Callable[[], None]) -> Callable[[], None]:
+    def changer(self, behaviour: Callable[[], None]) -> Callable[..., None]:
         """Creates a callback to defer behaviour changing"""
-        return lambda: self.change_behaviour(behaviour)
+        return lambda *_: self.change_behaviour(behaviour)
 
     def idle(self) -> None:
         pass

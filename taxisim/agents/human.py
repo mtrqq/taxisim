@@ -1,21 +1,13 @@
-import random
-
 import mesa
 
 from taxisim.agents.mut import MutableBehaviourAgent
-from taxisim.agents.wait import CarWaiter
+from taxisim.agents.strat import CarWaiter
+from taxisim.agents.strat import StatusChecker
 from taxisim.callback import Callback
 from taxisim.friends import FriendsService
 from taxisim.friends import Role
 from taxisim.human import Human
 from taxisim.taxi import TaxiService
-
-LONELY_CHANCE: float = 0.001
-TIRED_CHANCE: float = 0.001
-
-
-def _check_chance(chance: float) -> bool:
-    return random.random() <= chance
 
 
 class HumanAgent(MutableBehaviourAgent):
@@ -24,6 +16,8 @@ class HumanAgent(MutableBehaviourAgent):
         model: mesa.Model,
         human: Human,
         should_wait: CarWaiter,
+        lonely_checker: StatusChecker,
+        tired_checker: StatusChecker,
         taxi_api: TaxiService,
         friends_api: FriendsService,
     ) -> None:
@@ -48,9 +42,11 @@ class HumanAgent(MutableBehaviourAgent):
         self.taxi_api = taxi_api
         self.friends_api = friends_api
         self.should_wait = should_wait
+        self.lonely_checker = lonely_checker
+        self.tired_checker = tired_checker
 
     def _check_is_lonely(self) -> None:
-        if _check_chance(LONELY_CHANCE):
+        if self.lonely_checker():
             self.human.feel_lonely()
 
     def _notify_host(self) -> None:
@@ -72,7 +68,7 @@ class HumanAgent(MutableBehaviourAgent):
             raise RuntimeError(f"Unresolved role {role} encountered")
 
     def _check_tired(self) -> None:
-        if _check_chance(TIRED_CHANCE):
+        if self.tired_checker():
             self.human.tired()
             self.human.friend.tired()
 

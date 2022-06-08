@@ -1,6 +1,8 @@
+import random
 from typing import Callable
 
 CarWaiter = Callable[[int, float], bool]
+StatusChecker = Callable[[], bool]
 
 
 def wait_n_ticks(n: int) -> CarWaiter:
@@ -8,3 +10,10 @@ def wait_n_ticks(n: int) -> CarWaiter:
         return tick <= n
 
     return should_wait
+
+
+def random_checker(chance: float) -> StatusChecker:
+    def check() -> bool:
+        return random.random() <= chance
+
+    return check

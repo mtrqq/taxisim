@@ -15,7 +15,8 @@ if TYPE_CHECKING:
 
 class State(enum.IntEnum):
     WaitRide = enum.auto()
-    Ride = enum.auto()
+    PickupPassenger = enum.auto()
+    RideToDest = enum.auto()
 
 
 class Car:
@@ -35,6 +36,7 @@ class Car:
         *,
         id: uuid.UUID | None = None,
         on_ride_accepted: Callable[["Ride"], None] | None = None,
+        on_passenger_picked_up: Callable[[], None] | None = None,
         on_ride_finished: Callable[[], None] | None = None,
     ) -> None:
         self.id = id or uuid.uuid4()
@@ -43,6 +45,7 @@ class Car:
         self.ride: Optional["Ride"] = None
 
         self.on_ride_accepted = Callback.from_optional(on_ride_accepted)
+        self.on_passenger_picked_up = Callback.from_optional(on_passenger_picked_up)
         self.on_ride_finished = Callback.from_optional(on_ride_finished)
         self._smachine = transitions.Machine(
             self,
@@ -52,12 +55,18 @@ class Car:
                 {
                     "trigger": "accept_ride",
                     "source": State.WaitRide,
-                    "dest": State.Ride,
+                    "dest": State.PickupPassenger,
+                    "after": self.on_ride_accepted,
+                },
+                {
+                    "trigger": "picked_up",
+                    "source": State.PickupPassenger,
+                    "dest": State.RideToDest,
                     "after": self.on_ride_accepted,
                 },
                 {
                     "trigger": "ride_finished",
-                    "source": State.Ride,
+                    "source": State.RideToDest,
                     "dest": State.WaitRide,
                     "after": self.on_ride_finished,
                 },
@@ -69,7 +78,7 @@ class Car:
 
     @property
     def is_in_ride(self) -> bool:
-        return self.state == State.Ride
+        return self.state == State.RideToDest
 
     @property
     def is_free(self) -> bool:
