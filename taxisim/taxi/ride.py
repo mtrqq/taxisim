@@ -73,10 +73,11 @@ class Ride:
                     "trigger": "assign_car",
                     "source": State.Pending,
                     "dest": State.CarAssigned,
+                    "before": self._assign_car,
                     "after": self.on_car_assigned,
                 },
                 {
-                    "trigger": "pick_up",
+                    "trigger": "car_arrived",
                     "source": State.CarAssigned,
                     "dest": State.InProgress,
                     "before": [self._mark_started, self.on_car_arrived],
@@ -89,12 +90,15 @@ class Ride:
                 },
                 {
                     "trigger": "cancel",
-                    "source": [State.Pending, State.CarAssigned],
+                    "source": [State.Pending, State.CarAssigned, State.InProgress],
                     "dest": State.Cancelled,
                     "after": [self._mark_done, self.on_ride_cancelled],
                 },
             ],
         )
+
+    def _assign_car(self, car: "Car") -> None:
+        self.car = car
 
     def _mark_started(self, *_: Any) -> None:
         self.started_at = ticks.get()
@@ -125,7 +129,7 @@ class Ride:
     @property
     def wait_time(self) -> int:
         if not self.is_done:
-            return ticks.get() - self.started_at
+            return ticks.get() - self.created_at
 
         if self.is_cancelled:
             return self.done_at - self.created_at

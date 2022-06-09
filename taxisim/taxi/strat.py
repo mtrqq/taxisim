@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 from typing import Callable
 from typing import Collection
+from typing import Optional
 
 if TYPE_CHECKING:
     from taxisim.point import Point
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
     from taxisim.taxi.ride import Ride
 
 
-CarFinder = Callable[["Ride", Collection["Car"]], "Car" | None]
+CarFinder = Callable[["Ride", Collection["Car"]], Optional["Car"]]
 PriceCalculator = Callable[["Point", "Point"], float]
 
 
@@ -20,7 +21,7 @@ def price_per_unit(price: float) -> PriceCalculator:
 
 
 def any_free_car() -> CarFinder:
-    def finder(_: "Ride", cars: Collection["Car"]) -> "Car" | None:
+    def finder(_: "Ride", cars: Collection["Car"]) -> Optional["Car"]:
         for car in cars:
             if car.is_free:
                 return car
@@ -31,7 +32,7 @@ def any_free_car() -> CarFinder:
 
 
 def closest_free_car() -> CarFinder:
-    def finder(ride: "Ride", cars: Collection["Car"]) -> "Car" | None:
+    def finder(ride: "Ride", cars: Collection["Car"]) -> Optional["Car"]:
         cars = sorted(cars, key=lambda car: ride.source.distance_to(car.pos))
         for car in cars:
             if car.is_free:

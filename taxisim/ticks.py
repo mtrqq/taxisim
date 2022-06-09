@@ -15,3 +15,7 @@ def increment_by(by: int, /, tid: Hashable | None = None) -> int:
 
 def increment(tid: Hashable | None = None) -> int:
     return increment_by(1)
+
+
+def reset(tid: Hashable | None = None) -> None:
+    _TICKS[tid] = 0

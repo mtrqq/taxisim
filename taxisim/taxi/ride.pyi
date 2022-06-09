@@ -5,9 +5,7 @@ from taxisim.callback import Callback
 from taxisim.human import Human
 from taxisim.point import Point
 from taxisim.taxi.car import Car
-import transitions
 
-# mark State as existing class
 class State(enum.Enum): ...
 
 class Ride:
@@ -17,6 +15,11 @@ class Ride:
     dest: Point
     passenger: Human
     car: Optional[Car]
+
+    created_at: int
+    started_at: int
+    done_at: int
+
     on_car_assigned: Callback[[Optional[Car]]]
     on_car_arrived: Callback[[]]
     on_ride_finished: Callback[[]]
@@ -35,7 +38,7 @@ class Ride:
         on_ride_cancelled: Optional[Callable[[], None]] = ...,
     ) -> None: ...
     def assign_car(self, car: Optional[Car] = ...) -> None: ...
-    def pick_up(self) -> None: ...
+    def car_arrived(self) -> None: ...
     def finish(self) -> None: ...
     def cancel(self) -> None: ...
     @property

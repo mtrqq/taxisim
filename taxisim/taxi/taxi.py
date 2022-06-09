@@ -41,16 +41,20 @@ class TaxiService:
         self.price_calculator = price_calculator
 
         self._rides: dict[uuid.UUID, Ride] = {}
-        self._reg_cars: dict[uuid.UUID, "Car"] = {}
         self._free_cars: dict[uuid.UUID, "Car"] = {}
         self._events: EventServer[RideEvent] = EventServer(
             self._handle_ride, daemon=daemon, queue=PriorityQueue()
         )
 
     def _handle_ride(self, event: RideEvent) -> bool:
+        if event.ride.is_cancelled:
+            return True
+
         car = self.car_finder(event.ride, self._free_cars.values())
         if car is not None:
-            event.ride.assign_car(car)
+            if not event.ride.is_cancelled:
+                car.accept_ride(event.ride)
+                event.ride.assign_car(car)
             return True
 
         return False
@@ -85,6 +89,7 @@ class TaxiService:
         passenger: "Human",
         on_car_assigned: Callable[["Car"], None] | None = None,
         on_car_arrived: Callable[[], None] | None = None,
+        on_ride_finished: Callable[[], None] | None = None,
     ) -> Ride:
         ride_id = uuid.uuid4()
         ride = Ride(
@@ -94,8 +99,10 @@ class TaxiService:
             id=ride_id,
             on_car_assigned=on_car_assigned,
             on_car_arrived=on_car_arrived,
+            on_ride_finished=on_ride_finished,
         )
         self._events.emit(RideEvent.timebased(ride))
+        self._rides[ride.id] = ride
         return ride
 
     def get_price(self, source: "Point", dest: "Point") -> float:
@@ -103,6 +110,8 @@ class TaxiService:
 
     def cancel_ride(self, id: uuid.UUID) -> None:
         ride = self.get_ride_info(id)
+        if ride.car is not None:
+            ride.car.cancel_ride()
         ride.cancel()
 
     def start(self) -> None:

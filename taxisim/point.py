@@ -49,8 +49,12 @@ class Point:
     def distance_to(self, other: "Point") -> float:
         return math.hypot(*self.vector_to(other))
 
-    def advanced(self, to: "Point", dist: float) -> "Point":
-        ratio = dist / self.distance_to(to)
+    def advanced(self, to: "Point", by: float) -> "Point":
+        distance = self.distance_to(to)
+        if distance == 0.0:
+            return self
+
+        ratio = by / distance
         nratio = 1 - ratio
 
         return Point.from_array(
@@ -72,3 +76,6 @@ class Point:
             return NotImplemented
 
         return np.isclose(self.array, other.array, atol=self.PRECISION).all()
+
+    def __repr__(self) -> str:
+        return f"Point({str(self.array)})"

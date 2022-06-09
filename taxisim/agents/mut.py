@@ -10,8 +10,8 @@ class MutableBehaviourAgent(mesa.Agent):
         model: mesa.Model,
         behaviour: Callable[[], None] | None = None,
     ) -> None:
-        super().__init__(unique_id, model)
         self.behaviour = behaviour or self.idle
+        super().__init__(unique_id, model)
 
     def change_behaviour(self, behaviour: Callable[[], None]) -> None:
         self.behaviour = behaviour

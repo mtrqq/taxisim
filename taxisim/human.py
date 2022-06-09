@@ -83,6 +83,7 @@ class Human:
         self._is_host: bool | None = None
         self._friend: "Human" | None = None
         self._ride: "Ride" | None = None
+        self._car_is_waiting: bool = False
 
         self.on_rest_started = Callback.from_optional(on_rest_started)
         self.on_wanna_party = Callback.from_optional(on_wanna_party)
@@ -111,6 +112,10 @@ class Human:
         return _ensureattr(self._ride, "ride")
 
     @property
+    def car_is_waiting(self) -> bool:
+        return self._car_is_waiting
+
+    @property
     def is_in_ride(self) -> bool:
         return self._ride is not None
 
@@ -128,6 +133,7 @@ class Human:
 
     def _order_car(self, source: "Point", dest: "Point") -> None:
         self._ride_src_dest = source, dest
+        self._car_is_waiting = False
 
     def _invited_by(self, friend: "Human") -> None:
         self._is_host = False
@@ -149,6 +155,15 @@ class Human:
         self._is_host = None
         self._friend = None
         self._ride = None
+        self._car_is_waiting = False
+
+    def _car_arrived(self) -> None:
+        self._car_is_waiting = True
+
+    def _try_sit_into_car(self) -> None:
+        if self.car_is_waiting:
+            self.ride.car.pick_up_passenger()
+            self._car_is_waiting = None
 
     def _build_fsm(self) -> transitions.Machine:
         machine = transitions.Machine(
@@ -204,18 +219,26 @@ class Human:
                 {
                     "trigger": "car_arrived",
                     "source": State.AwaitingRide,
+                    "dest": State.AwaitingRide,
+                    "after": self._car_arrived,
+                },
+                {
+                    "trigger": "sit_into_car",
+                    "source": State.AwaitingRide,
                     "dest": State.Ride,
+                    "before": self._try_sit_into_car,
+                    "after": self.on_ride_started,
                 },
                 {
                     "trigger": "skip_ride",
-                    "source": State.AwaitingRide,
+                    "source": [State.AwaitingRide, State.OrderingCar, State.Ride],
                     "dest": State.Party,
                     "conditions": "is_at_home",
                     "after": self._arrived_to_party,
                 },
                 {
                     "trigger": "skip_ride",
-                    "source": [State.AwaitingRide, State.OrderingCar],
+                    "source": [State.AwaitingRide, State.OrderingCar, State.Ride],
                     "dest": State.Rest,
                     "unless": "is_at_home",
                 },
@@ -271,3 +294,6 @@ class Human:
         )
 
         return machine
+
+    def __repr__(self) -> str:
+        return f"Human(name={self.name}, state={self.state.name})"

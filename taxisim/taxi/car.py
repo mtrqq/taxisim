@@ -15,7 +15,8 @@ if TYPE_CHECKING:
 
 class State(enum.IntEnum):
     WaitRide = enum.auto()
-    PickupPassenger = enum.auto()
+    RideToSource = enum.auto()
+    WaitPassenger = enum.auto()
     RideToDest = enum.auto()
 
 
@@ -36,7 +37,8 @@ class Car:
         *,
         id: uuid.UUID | None = None,
         on_ride_accepted: Callable[["Ride"], None] | None = None,
-        on_passenger_picked_up: Callable[[], None] | None = None,
+        on_ride_started: Callable[[], None] | None = None,
+        on_waiting_passenger: Callable[[], None] | None = None,
         on_ride_finished: Callable[[], None] | None = None,
     ) -> None:
         self.id = id or uuid.uuid4()
@@ -45,7 +47,8 @@ class Car:
         self.ride: Optional["Ride"] = None
 
         self.on_ride_accepted = Callback.from_optional(on_ride_accepted)
-        self.on_passenger_picked_up = Callback.from_optional(on_passenger_picked_up)
+        self.on_waiting_passenger = Callback.from_optional(on_waiting_passenger)
+        self.on_ride_started = Callback.from_optional(on_ride_finished)
         self.on_ride_finished = Callback.from_optional(on_ride_finished)
         self._smachine = transitions.Machine(
             self,
@@ -55,26 +58,55 @@ class Car:
                 {
                     "trigger": "accept_ride",
                     "source": State.WaitRide,
-                    "dest": State.PickupPassenger,
+                    "dest": State.RideToSource,
+                    "before": self._assign_ride,
                     "after": self.on_ride_accepted,
                 },
                 {
-                    "trigger": "picked_up",
-                    "source": State.PickupPassenger,
+                    "trigger": "arrive_to_source",
+                    "source": State.RideToSource,
+                    "dest": State.WaitPassenger,
+                    "after": [self._notify_passenger, self.on_waiting_passenger],
+                },
+                {
+                    "trigger": "pick_up_passenger",
+                    "source": State.WaitPassenger,
                     "dest": State.RideToDest,
-                    "after": self.on_ride_accepted,
+                    "after": self.on_ride_started,
                 },
                 {
-                    "trigger": "ride_finished",
+                    "trigger": "cancel_ride",
+                    "source": [
+                        State.RideToSource,
+                        State.RideToDest,
+                        State.WaitPassenger,
+                    ],
+                    "dest": State.WaitRide,
+                    "before": [self._clear_ride],
+                    "after": self.on_ride_finished,
+                },
+                {
+                    "trigger": "arrive_to_dest",
                     "source": State.RideToDest,
                     "dest": State.WaitRide,
+                    "before": [self._finish_ride, self._clear_ride],
                     "after": self.on_ride_finished,
                 },
             ],
         )
 
-    def set_environment(self, ride: Optional["Ride"] = None) -> None:
+    def _assign_ride(self, ride: "Ride") -> None:
         self.ride = ride
+
+    def _finish_ride(self) -> None:
+        self.ride.finish()
+
+    def _notify_passenger(self) -> None:
+        if not self.ride.is_cancelled:
+            self.ride.car_arrived()
+
+    def _clear_ride(self) -> None:
+        self.ride = None
 
     @property
     def is_in_ride(self) -> bool:
@@ -83,3 +115,6 @@ class Car:
     @property
     def is_free(self) -> bool:
         return self.state == State.WaitRide
+
+    def __repr__(self) -> str:
+        return f"Car(pos={self.pos}, state={self.state.name})"
