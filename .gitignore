@@ -157,3 +157,6 @@ cython_debug/
 .vscode/
 
 notes.txt
+*.pdf
+*.pprof
+*.pstats
