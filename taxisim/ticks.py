@@ -8,6 +8,10 @@ def get(tid: Hashable | None = None, /) -> int:
     return _TICKS[tid]
 
 
-def increment(tid: Hashable | None = None) -> int:
-    _TICKS[tid] += 1
+def increment_by(by: int, /, tid: Hashable | None = None) -> int:
+    _TICKS[tid] += by
     return _TICKS[tid]
+
+
+def increment(tid: Hashable | None = None) -> int:
+    return increment_by(1)

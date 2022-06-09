@@ -191,6 +191,11 @@ class Human:
                     ],
                 },
                 {
+                    "trigger": "cancel_party",
+                    "source": State.OrderingCar,
+                    "dest": State.Rest,
+                },
+                {
                     "trigger": "ordered_ride",
                     "source": State.OrderingCar,
                     "dest": State.AwaitingRide,
@@ -210,7 +215,7 @@ class Human:
                 },
                 {
                     "trigger": "skip_ride",
-                    "source": State.AwaitingRide,
+                    "source": [State.AwaitingRide, State.OrderingCar],
                     "dest": State.Rest,
                     "unless": "is_at_home",
                 },
@@ -245,6 +250,11 @@ class Human:
                     "source": State.WannaParty,
                     "dest": State.WaitGuest,
                     "before": self._host_party,
+                },
+                {
+                    "trigger": "cancel_party",
+                    "source": State.WaitGuest,
+                    "dest": State.Rest,
                 },
                 {
                     "trigger": "guest_arrived",

@@ -74,14 +74,24 @@ class HumanAgent(MutableBehaviourAgent):
 
     def _order_car(self) -> None:
         source, dest = self.human.order_src_dest
-        ride = self.taxi_api.request_ride(
-            source=source,
-            dest=dest,
-            passenger=self.human,
-            on_car_arrived=lambda: self.human.car_arrived(),
-        )
+        ride_price = self.taxi_api.get_price(source, dest)
 
-        self.human.ordered_ride(ride)
+        if self.human.balance < ride_price:
+            if not self.human.is_at_home:
+                self.human.skip_ride()
+            else:
+                self.human.cancel_party()
+                self.human.friend.cancel_party()
+        else:
+            ride = self.taxi_api.request_ride(
+                source=source,
+                dest=dest,
+                passenger=self.human,
+                on_car_arrived=lambda: self.human.car_arrived(),
+            )
+
+            self.human.balance - ride_price
+            self.human.ordered_ride(ride)
 
     def _wait_car(self) -> None:
         ride = self.human.ride
