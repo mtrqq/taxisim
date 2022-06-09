@@ -1,5 +1,4 @@
 from typing import Callable
-from typing import ParamSpec
 from typing import TypeVar
 
 import mesa
@@ -12,9 +11,6 @@ from taxisim.friends import FriendsService
 from taxisim.friends import Role
 from taxisim.human import Human
 from taxisim.taxi import TaxiService
-
-P = ParamSpec("P")
-T = TypeVar("T")
 
 
 def _once(fun):
@@ -54,7 +50,7 @@ class HumanAgent(MutableBehaviourAgent):
         human.on_wait_car.subscribe(self.changer(self._wait_car))
         human.on_ride_started.subscribe(self.changer(self.idle))
         human.on_party_started.subscribe(
-            Callback[[]](
+            Callback(
                 self._notify_host,
                 self.changer(self._check_tired),
             )

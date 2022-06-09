@@ -4,11 +4,11 @@ from typing import Hashable
 _TICKS = defaultdict(int)
 
 
-def get(tid=None, /):
+def get(tid=None):
     return _TICKS[tid]
 
 
-def increment_by(by, /, tid=None):
+def increment_by(by, tid=None):
     _TICKS[tid] += by
     return _TICKS[tid]
 

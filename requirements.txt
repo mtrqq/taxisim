@@ -1,4 +1,4 @@
 transitions>=0.8.11,<1.0
-numpy>=1.21,<2.0
+numpy>=1.19,<2.0
 mesa~=0.9
 faker>=13.0.0

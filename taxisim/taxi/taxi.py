@@ -21,8 +21,8 @@ if TYPE_CHECKING:
 
 @dataclass(order=True)
 class RideEvent:
-    # priority: float
-    ride = field(compare=False)
+    priority: float
+    ride: Any = field(compare=False)
 
     @classmethod
     def timebased(cls, ride):

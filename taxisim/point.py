@@ -5,11 +5,9 @@ from typing import Any
 from typing import ClassVar
 from typing import Container
 from typing import Iterator
+from typing import Any
 
 import numpy as np
-from numpy.typing import NDArray
-
-Number = int | float
 
 
 def _order(x, y):
@@ -23,7 +21,7 @@ def _order(x, y):
 class Point:
     PRECISION = 0.001
 
-    array: NDArray
+    array: Any
 
     @classmethod
     def from_array(cls, container):

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from dataclasses import field
 from typing import TYPE_CHECKING
+from typing import Tuple
+from typing import Any
 
 import faker
 import mesa
@@ -33,14 +35,14 @@ def _default_city_box():
 
 @dataclass(frozen=True)
 class Parameters:
-    lonely_chance = 0.001
-    tired_chance = 0.001
-    car_speed = 10
-    city_box = field(default_factory=_default_city_box)
-    initial_balance = 100.0
-    balance_increment = 5.0
-    waiter = None
-    wait_time = 60
+    lonely_chance: float = 0.001
+    tired_chance: float = 0.001
+    car_speed: int = 10
+    city_box: Tuple[Point, Point] = field(default_factory=_default_city_box)
+    initial_balance: float = 100.0
+    balance_increment: float = 5.0
+    waiter: Any = None
+    wait_time: int = 60
 
 
 class SimulationModel(mesa.Model):

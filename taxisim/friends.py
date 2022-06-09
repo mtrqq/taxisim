@@ -1,7 +1,7 @@
 import enum
 import queue
 from dataclasses import dataclass
-from queue import SimpleQueue
+from queue import Queue
 from typing import Any
 from typing import Callable
 
@@ -25,7 +25,7 @@ class FriendsService:
         self,
         daemon: bool = True,
     ) -> None:
-        self._requestsq: SimpleQueue[FriendRequest] = SimpleQueue()
+        self._requestsq: Queue[FriendRequest] = Queue()
         self._events = EventServer(
             self._handle_friend_request, daemon=daemon, queue=self._requestsq
         )

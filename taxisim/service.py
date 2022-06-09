@@ -1,10 +1,9 @@
 import queue
-from queue import SimpleQueue
+from queue import Queue
 from threading import Event
 from threading import Thread
 from typing import Callable
 from typing import Generic
-from typing import Protocol
 from typing import TypeVar
 
 EventType = TypeVar("EventType")
@@ -13,15 +12,6 @@ MessageType = TypeVar("MessageType")
 
 class ServiceShutdownError(RuntimeError):
     pass
-
-
-class QProto(Protocol[MessageType]):
-    def get(self, block=True, timeout=None):
-        ...
-
-    def put(self, item, block=True, timeout=None):
-        ...
-
 
 class EventServer(Generic[EventType]):
     def __init__(
@@ -35,7 +25,7 @@ class EventServer(Generic[EventType]):
         self.handle = handle
         self._interval = interval
         self._stop = Event()
-        self._events = queue if queue is not None else SimpleQueue()
+        self._events = queue if queue is not None else Queue()
         self._threads = [
             Thread(target=self.serve, daemon=daemon) for _ in range(threads)
         ]

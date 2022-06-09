@@ -1,11 +1,11 @@
 from typing import Callable
 from typing import Generic
-from typing import ParamSpec
+from typing import TypeVar
 
-P = ParamSpec("P")
+T = TypeVar('T')
 
 
-class Callback(Generic[P]):
+class Callback(Generic[T]):
     def __init__(self, *funcs):
         self.funcs = list(funcs)
 
