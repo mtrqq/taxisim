@@ -1,5 +1,4 @@
-__all__ = ["HumanAgent", "CarAgent", "BalanceIncrementorAgent"]
+__all__ = ["HumanAgent", "CarAgent"]
 
-from .balance import BalanceIncrementorAgent
 from .car import CarAgent
 from .human import HumanAgent

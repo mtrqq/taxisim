@@ -5,7 +5,6 @@ from mesa.time import BaseScheduler
 from taxisim import ticks
 from taxisim.agents import CarAgent
 from taxisim.agents import HumanAgent
-from taxisim.agents.balance import BalanceIncrementorAgent
 from taxisim.agents.strat import random_checker
 from taxisim.agents.strat import wait_n_ticks
 from taxisim.friends import FriendsService
@@ -39,15 +38,12 @@ class SimulationModel(mesa.Model):
         self.city_box = city_box
         self.taxi = taxi
         self.friends = friends
+        self.balance_increment = balance_increment
         self.simulation_speed = simulation_speed
         self.people: list[Human] = []
         self.cars: list[Car] = []
 
         self.scheduler = BaseScheduler(self)
-        self.scheduler.add(
-            BalanceIncrementorAgent(self, self.people, balance_increment)
-        )
-
         for _ in range(people):
             human = Human(
                 name=FAKE.name(),
@@ -74,5 +70,9 @@ class SimulationModel(mesa.Model):
 
     def step(self) -> None:
         self.scheduler.step()
+
         if ticks.increment_by(self.simulation_speed) > self.n_ticks:
             self.running = False
+
+        for human in self.people:
+            human.balance += self.balance_increment
