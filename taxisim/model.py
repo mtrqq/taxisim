@@ -27,40 +27,40 @@ if TYPE_CHECKING:
 FAKE = faker.Faker()
 
 
-def _default_city_box() -> tuple[Point, Point]:
+def _default_city_box():
     return Point.from_numbers(0, 0), Point.from_numbers(100, 100)
 
 
 @dataclass(frozen=True)
 class Parameters:
-    lonely_chance: float = 0.001
-    tired_chance: float = 0.001
-    car_speed: int = 10
-    city_box: tuple[Point, Point] = field(default_factory=_default_city_box)
-    initial_balance: float = 100.0
-    balance_increment: float = 5.0
-    waiter: CarWaiter | None = None
-    wait_time: int = 60
+    lonely_chance = 0.001
+    tired_chance = 0.001
+    car_speed = 10
+    city_box = field(default_factory=_default_city_box)
+    initial_balance = 100.0
+    balance_increment = 5.0
+    waiter = None
+    wait_time = 60
 
 
 class SimulationModel(mesa.Model):
     def __init__(
         self,
-        cars: int,
-        people: int,
-        n_ticks: int,
-        taxi: TaxiService,
-        friends: FriendsService,
-        parameters: Parameters | None = None,
-    ) -> None:
+        cars,
+        people,
+        n_ticks,
+        taxi,
+        friends,
+        parameters=None,
+    ):
         super().__init__()
 
         self.n_ticks = n_ticks
         self.taxi = taxi
         self.metrics = inject_metrics(self.taxi)
         self.friends = friends
-        self.people: list[Human] = []
-        self.cars: list[Car] = []
+        self.people = []
+        self.cars = []
         self.parameters = parameters or Parameters()
         self.datacollector = DataCollector(
             model_reporters={
@@ -104,17 +104,17 @@ class SimulationModel(mesa.Model):
             self.cars.append(car)
             self.scheduler.add(agent)
 
-    def get_statistics(self) -> "DataFrame":
+    def get_statistics(self):
         return self.datacollector.get_model_vars_dataframe()
 
-    def step(self) -> None:
+    def step(self):
         self.datacollector.collect(self)
         self.scheduler.step()
         ticks.increment()
         for human in self.people:
             human.balance += self.parameters.balance_increment
 
-    def run_model(self, with_progress: bool = False) -> None:
+    def run_model(self, with_progress=False):
         ticks.reset()
         if with_progress:
             rng = tqdm.trange(self.n_ticks)

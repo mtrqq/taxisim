@@ -13,15 +13,15 @@ CarFinder = Callable[["Ride", Collection["Car"]], Optional["Car"]]
 PriceCalculator = Callable[["Point", "Point"], float]
 
 
-def price_per_unit(price: float) -> PriceCalculator:
-    def calculator(p1: "Point", p2: "Point") -> float:
+def price_per_unit(price):
+    def calculator(p1, p2):
         return p1.distance_to(p2) * price
 
     return calculator
 
 
-def any_free_car() -> CarFinder:
-    def finder(_: "Ride", cars: Collection["Car"]) -> Optional["Car"]:
+def any_free_car():
+    def finder(_, cars):
         for car in cars:
             if car.is_free:
                 return car
@@ -31,8 +31,8 @@ def any_free_car() -> CarFinder:
     return finder
 
 
-def closest_free_car() -> CarFinder:
-    def finder(ride: "Ride", cars: Collection["Car"]) -> Optional["Car"]:
+def closest_free_car():
+    def finder(ride, cars):
         cars = sorted(cars, key=lambda car: ride.source.distance_to(car.pos))
         for car in cars:
             if car.is_free:

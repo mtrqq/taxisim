@@ -32,19 +32,19 @@ class Car:
 
     def __init__(
         self,
-        pos: "Point",
-        speed: float,
+        pos,
+        speed,
         *,
-        id: uuid.UUID | None = None,
-        on_ride_accepted: Callable[["Ride"], None] | None = None,
-        on_ride_started: Callable[[], None] | None = None,
-        on_waiting_passenger: Callable[[], None] | None = None,
-        on_ride_finished: Callable[[], None] | None = None,
-    ) -> None:
+        id=None,
+        on_ride_accepted=None,
+        on_ride_started=None,
+        on_waiting_passenger=None,
+        on_ride_finished=None,
+    ):
         self.id = id or uuid.uuid4()
         self.speed = speed
         self.pos = pos
-        self.ride: Optional["Ride"] = None
+        self.ride = None
 
         self.on_ride_accepted = Callback.from_optional(on_ride_accepted)
         self.on_waiting_passenger = Callback.from_optional(on_waiting_passenger)
@@ -95,26 +95,26 @@ class Car:
             ],
         )
 
-    def _assign_ride(self, ride: "Ride") -> None:
+    def _assign_ride(self, ride):
         self.ride = ride
 
-    def _finish_ride(self) -> None:
+    def _finish_ride(self):
         self.ride.finish()
 
-    def _notify_passenger(self) -> None:
+    def _notify_passenger(self):
         if not self.ride.is_cancelled:
             self.ride.car_arrived()
 
-    def _clear_ride(self) -> None:
+    def _clear_ride(self):
         self.ride = None
 
     @property
-    def is_in_ride(self) -> bool:
+    def is_in_ride(self):
         return self.state == State.RideToDest
 
     @property
-    def is_free(self) -> bool:
+    def is_free(self):
         return self.state == State.WaitRide
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f"Car(pos={self.pos}, state={self.state.name})"

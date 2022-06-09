@@ -1,21 +1,21 @@
 from collections import defaultdict
 from typing import Hashable
 
-_TICKS: dict[Hashable, int] = defaultdict(int)
+_TICKS = defaultdict(int)
 
 
-def get(tid: Hashable | None = None, /) -> int:
+def get(tid=None, /):
     return _TICKS[tid]
 
 
-def increment_by(by: int, /, tid: Hashable | None = None) -> int:
+def increment_by(by, /, tid=None):
     _TICKS[tid] += by
     return _TICKS[tid]
 
 
-def increment(tid: Hashable | None = None) -> int:
+def increment(tid=None):
     return increment_by(1)
 
 
-def reset(tid: Hashable | None = None) -> None:
+def reset(tid=None):
     _TICKS[tid] = 0

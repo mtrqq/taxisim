@@ -16,42 +16,42 @@ class ServiceShutdownError(RuntimeError):
 
 
 class QProto(Protocol[MessageType]):
-    def get(self, block: bool = True, timeout: float = None) -> MessageType:
+    def get(self, block=True, timeout=None):
         ...
 
-    def put(self, item: MessageType, block: bool = True, timeout: float = None):
+    def put(self, item, block=True, timeout=None):
         ...
 
 
 class EventServer(Generic[EventType]):
     def __init__(
         self,
-        handle: Callable[[EventType], bool],
-        threads: int = 1,
-        interval: float = 1.0,
-        daemon: bool = False,
-        queue: QProto[EventType] | None = None,
-    ) -> None:
+        handle,
+        threads=1,
+        interval=1.0,
+        daemon=False,
+        queue=None,
+    ):
         self.handle = handle
         self._interval = interval
         self._stop = Event()
-        self._events: QProto[EventType] = queue if queue is not None else SimpleQueue()
-        self._threads: list[Thread] = [
+        self._events = queue if queue is not None else SimpleQueue()
+        self._threads = [
             Thread(target=self.serve, daemon=daemon) for _ in range(threads)
         ]
 
     @property
-    def is_alive(self) -> bool:
+    def is_alive(self):
         return any(thread.is_alive() for thread in self._threads)
 
-    def start(self) -> None:
+    def start(self):
         if self.is_alive:
             raise RuntimeError("Server is already started")
 
         for thread in self._threads:
             thread.start()
 
-    def shutdown(self, nowait: bool = False) -> None:
+    def shutdown(self, nowait=False):
         if not self.is_alive:
             raise RuntimeError("Server is not alive")
 
@@ -60,7 +60,7 @@ class EventServer(Generic[EventType]):
             for thread in self._threads:
                 thread.join()
 
-    def serve(self) -> None:
+    def serve(self):
         while not self._stop.is_set():
             try:
                 event = self._events.get(timeout=self._interval)
@@ -69,7 +69,7 @@ class EventServer(Generic[EventType]):
             except queue.Empty:
                 pass
 
-    def emit(self, event: EventType) -> None:
+    def emit(self, event):
         if self._stop.is_set():
             raise ServiceShutdownError("Event service is shutting down")
 

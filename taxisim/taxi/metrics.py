@@ -7,20 +7,20 @@ from taxisim.taxi.ride import Ride
 from taxisim.taxi.taxi import TaxiService
 
 
-def _add_average(avg1: float, size1: int, avg2: float, size2: int = 1) -> float:
+def _add_average(avg1, size1, avg2, size2=1):
     return (size1 * avg1 + size2 * avg2) / (size1 + size2)
 
 
 class TaxiMetrics:
     def __init__(
         self,
-        finished: int = 0,
-        cancelled: int = 0,
-        distance: float = 0.0,
-        money_earned: float = 0.0,
-        money_lost: float = 0.0,
-        wait_times: list[float] | None = None,
-    ) -> None:
+        finished=0,
+        cancelled=0,
+        distance=0.0,
+        money_earned=0.0,
+        money_lost=0.0,
+        wait_times=None,
+    ):
         self.finished = finished
         self.cancelled = cancelled
         self.distance = distance
@@ -28,7 +28,7 @@ class TaxiMetrics:
         self.money_lost = money_lost
         self.wait_times = wait_times or []
 
-    def add_ride(self, ride: Ride, price: float):
+    def add_ride(self, ride, price):
         self.distance += ride.source.distance_to(ride.dest)
         if ride.wait_time > 1000:
             ride.wait_time
@@ -42,33 +42,33 @@ class TaxiMetrics:
             self.cancelled += 1
 
     @property
-    def avg_wait_time(self) -> float:
+    def avg_wait_time(self):
         if len(self.wait_times) == 0:
             return 0.0
 
         return sum(self.wait_times) / len(self.wait_times)
 
     @property
-    def total(self) -> int:
+    def total(self):
         return self.finished + self.cancelled
 
 
-def inject_metrics(service: TaxiService) -> TaxiMetrics:
+def inject_metrics(service):
     metrics = TaxiMetrics()
     default_request_ride = service.request_ride
 
-    def add_ride(ride: Ride) -> None:
+    def add_ride(ride):
         price = service.get_price(ride.source, ride.dest)
         metrics.add_ride(ride, price)
 
     def request_ride(
-        source: "Point",
-        dest: "Point",
-        passenger: "Human",
-        on_car_assigned: Callable[["Car"], None] | None = None,
-        on_car_arrived: Callable[[], None] | None = None,
-        on_ride_finished: Callable[[], None] | None = None,
-    ) -> Ride:
+        source,
+        dest,
+        passenger,
+        on_car_assigned=None,
+        on_car_arrived=None,
+        on_ride_finished=None,
+    ):
         ride = default_request_ride(
             source,
             dest,

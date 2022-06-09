@@ -6,16 +6,16 @@ P = ParamSpec("P")
 
 
 class Callback(Generic[P]):
-    def __init__(self, *funcs: Callable[P, None]) -> None:
+    def __init__(self, *funcs):
         self.funcs = list(funcs)
 
     @classmethod
-    def from_optional(cls, *funcs: Callable[P, None] | None) -> "Callback[P]":
+    def from_optional(cls, *funcs):
         return cls(*filter(None, funcs))
 
-    def subscribe(self, *funcs: Callable[P, None]) -> None:
+    def subscribe(self, *funcs):
         self.funcs.extend(funcs)
 
-    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> None:
+    def __call__(self, *args, **kwargs):
         for func in self.funcs:
             func(*args, **kwargs)

@@ -17,10 +17,10 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def _once(fun: Callable[P, None]) -> Callable[P, None]:
-    called: bool = False
+def _once(fun):
+    called = False
 
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
+    def wrapper(*args, **kwargs):
         nonlocal called
 
         if not called:
@@ -33,14 +33,14 @@ def _once(fun: Callable[P, None]) -> Callable[P, None]:
 class HumanAgent(MutableBehaviourAgent):
     def __init__(
         self,
-        model: mesa.Model,
-        human: Human,
-        should_wait: CarWaiter,
-        lonely_checker: StatusChecker,
-        tired_checker: StatusChecker,
-        taxi_api: TaxiService,
-        friends_api: FriendsService,
-    ) -> None:
+        model,
+        human,
+        should_wait,
+        lonely_checker,
+        tired_checker,
+        taxi_api,
+        friends_api,
+    ):
         if not human.is_resting:
             raise ValueError("Human should be in 'initial' state")
 
@@ -67,21 +67,21 @@ class HumanAgent(MutableBehaviourAgent):
         self.lonely_checker = lonely_checker
         self.tired_checker = tired_checker
 
-    def _check_is_lonely(self) -> None:
+    def _check_is_lonely(self):
         if self.lonely_checker():
             self.human.feel_lonely()
 
-    def _notify_host(self) -> None:
+    def _notify_host(self):
         if not self.human.is_host:
             self.human.friend.guest_arrived()
 
-    def _search_friend(self) -> None:
+    def _search_friend(self):
         self.friends_api.find_friend(
             me=self.human,
             on_found=self._friend_found,
         )
 
-    def _friend_found(self, friend: Human, role: Role) -> None:
+    def _friend_found(self, friend, role):
         if role == Role.Host:
             self.behaviour = _once(lambda: self.human.host_party(friend))
         elif role == Role.Guest:
@@ -89,12 +89,12 @@ class HumanAgent(MutableBehaviourAgent):
         else:
             raise RuntimeError(f"Unresolved role {role} encountered")
 
-    def _check_tired(self) -> None:
+    def _check_tired(self):
         if self.tired_checker():
             self.human.friend.tired()
             self.human.tired()
 
-    def _order_car(self) -> None:
+    def _order_car(self):
         source, dest = self.human.order_src_dest
         ride_price = self.taxi_api.get_price(source, dest)
 
@@ -116,7 +116,7 @@ class HumanAgent(MutableBehaviourAgent):
             self.human.balance - ride_price
             self.human.ordered_ride(ride)
 
-    def _wait_car(self) -> None:
+    def _wait_car(self):
         if self.human.car_is_waiting:
             self.human.sit_into_car()
 

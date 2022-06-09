@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-def _ensureattr(attr: T | None, name: str) -> T:
+def _ensureattr(attr, name):
     if attr is None:
         raise RuntimeError(f"Unable to fetch {name} value")
 
@@ -59,31 +59,31 @@ class Human:
 
     def __init__(
         self,
-        name: str,
-        home: "Point",
-        balance: float,
+        name,
+        home,
+        balance,
         *,
-        id: uuid.UUID | None = None,
-        on_rest_started: Callable[[], None] | None = None,
-        on_wanna_party: Callable[[], None] | None = None,
-        on_friend_found: Callable[[], None] | None = None,
-        on_ordering_car: Callable[[], None] | None = None,
-        on_wait_car: Callable[[], None] | None = None,
-        on_ride_started: Callable[[], None] | None = None,
-        on_wait_guest: Callable[[], None] | None = None,
-        on_party_started: Callable[[], None] | None = None,
-    ) -> None:
-        self.id: uuid.UUID = id or uuid.uuid4()
+        id=None,
+        on_rest_started=None,
+        on_wanna_party=None,
+        on_friend_found=None,
+        on_ordering_car=None,
+        on_wait_car=None,
+        on_ride_started=None,
+        on_wait_guest=None,
+        on_party_started=None,
+    ):
+        self.id = id or uuid.uuid4()
         self.name = name
         self.balance = balance
         self.pos = home
         self.home = home
 
-        self._ride_src_dest: tuple["Point", "Point"] | None = None
-        self._is_host: bool | None = None
-        self._friend: "Human" | None = None
-        self._ride: "Ride" | None = None
-        self._car_is_waiting: bool = False
+        self._ride_src_dest = None
+        self._is_host = None
+        self._friend = None
+        self._ride = None
+        self._car_is_waiting = False
 
         self.on_rest_started = Callback.from_optional(on_rest_started)
         self.on_wanna_party = Callback.from_optional(on_wanna_party)
@@ -96,76 +96,76 @@ class Human:
         self._smachine = self._build_fsm()
 
     @property
-    def is_host(self) -> bool:
+    def is_host(self):
         return _ensureattr(self._is_host, "is_host")
 
     @property
-    def friend(self) -> "Human":
+    def friend(self):
         return _ensureattr(self._friend, "friend")
 
     @property
-    def order_src_dest(self) -> tuple["Point", "Point"]:
+    def order_src_dest(self):
         return _ensureattr(self._ride_src_dest, "_ride_src_dest")
 
     @property
-    def ride(self) -> "Ride":
+    def ride(self):
         return _ensureattr(self._ride, "ride")
 
     @property
-    def car_is_waiting(self) -> bool:
+    def car_is_waiting(self):
         return self._car_is_waiting
 
     @property
-    def is_in_ride(self) -> bool:
+    def is_in_ride(self):
         return self._ride is not None
 
     @property
-    def is_at_home(self) -> bool:
+    def is_at_home(self):
         return self.pos == self.home
 
     @property
-    def is_resting(self) -> bool:
+    def is_resting(self):
         return self.state == State.Rest
 
     @property
-    def is_searching_friend(self) -> bool:
+    def is_searching_friend(self):
         return self.state == State.WannaParty
 
-    def _order_car(self, source: "Point", dest: "Point") -> None:
+    def _order_car(self, source, dest):
         self._ride_src_dest = source, dest
         self._car_is_waiting = False
 
-    def _invited_by(self, friend: "Human") -> None:
+    def _invited_by(self, friend):
         self._is_host = False
         self._friend = friend
 
-    def _host_party(self, guest: "Human") -> None:
+    def _host_party(self, guest):
         self._is_host = True
         self._friend = guest
 
-    def _assign_ride(self, ride: "Ride") -> None:
+    def _assign_ride(self, ride):
         self._ride = ride
 
-    def _arrived_to_party(self) -> None:
+    def _arrived_to_party(self):
         self.pos = self.friend.home
         self._ride = None
 
-    def _reset_context(self) -> None:
+    def _reset_context(self):
         self.pos = self.home
         self._is_host = None
         self._friend = None
         self._ride = None
         self._car_is_waiting = False
 
-    def _car_arrived(self) -> None:
+    def _car_arrived(self):
         self._car_is_waiting = True
 
-    def _try_sit_into_car(self) -> None:
+    def _try_sit_into_car(self):
         if self.car_is_waiting:
             self.ride.car.pick_up_passenger()
             self._car_is_waiting = None
 
-    def _build_fsm(self) -> transitions.Machine:
+    def _build_fsm(self):
         machine = transitions.Machine(
             self,
             states=[
@@ -295,5 +295,5 @@ class Human:
 
         return machine
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f"Human(name={self.name}, state={self.state.name})"

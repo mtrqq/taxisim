@@ -8,12 +8,12 @@ from taxisim.taxi.car import Car
 from taxisim.taxi.ride import Ride
 
 
-def _will_arrive_to(source: Point, dest: Point, speed: float) -> bool:
+def _will_arrive_to(source, dest, speed):
     return source.distance_to(dest) <= speed
 
 
 class CarAgent(MutableBehaviourAgent):
-    def __init__(self, model: mesa.Model, car: Car) -> None:
+    def __init__(self, model, car):
         if not car.is_free:
             raise ValueError("Human should be in 'initial' state")
 
@@ -24,7 +24,7 @@ class CarAgent(MutableBehaviourAgent):
         car.on_ride_finished.subscribe(self.changer(self.idle))
         self.car = car
 
-    def _move_to_src(self) -> None:
+    def _move_to_src(self):
         ride = cast(Ride, self.car.ride)
         if _will_arrive_to(self.car.pos, ride.source, self.car.speed):
             self.car.pos = ride.source
@@ -32,7 +32,7 @@ class CarAgent(MutableBehaviourAgent):
         else:
             self.car.pos = self.car.pos.advanced(ride.source, self.car.speed)
 
-    def _move_to_dest(self) -> None:
+    def _move_to_dest(self):
         ride = cast(Ride, self.car.ride)
         if _will_arrive_to(self.car.pos, ride.dest, self.car.speed):
             self.car.pos = ride.dest
