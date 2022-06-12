@@ -82,6 +82,9 @@ class TaxiService:
         except KeyError:
             raise RuntimeError(f"Ride with id {id} not found") from None
 
+    def _remove_ride(self, id: uuid.UUID) -> None:
+        del self._rides[id]
+
     def request_ride(
         self,
         source: "Point",
@@ -91,16 +94,16 @@ class TaxiService:
         on_car_arrived: Callable[[], None] | None = None,
         on_ride_finished: Callable[[], None] | None = None,
     ) -> Ride:
-        ride_id = uuid.uuid4()
         ride = Ride(
             source,
             dest,
             passenger=passenger,
-            id=ride_id,
             on_car_assigned=on_car_assigned,
             on_car_arrived=on_car_arrived,
             on_ride_finished=on_ride_finished,
         )
+        ride.on_ride_finished.subscribe(lambda: self._remove_ride(ride.id))
+        ride.on_ride_cancelled.subscribe(lambda: self._remove_ride(ride.id))
         self._events.emit(RideEvent.timebased(ride))
         self._rides[ride.id] = ride
         return ride
